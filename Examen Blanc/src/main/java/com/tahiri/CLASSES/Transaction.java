@@ -1,83 +1,64 @@
 package com.tahiri.CLASSES;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Transaction {
-    private final String id;
-    private final Date date;
-    private final double montant;
-    private final Type type;
+    private String id;
+    private LocalDate date;
+    private double montant;
+    private TypeTransaction type;
 
-    // Constructeur privé pour forcer l'utilisation du Builder
-    private Transaction(Builder builder) {
-        this.id = builder.id;
-        this.date = builder.date;
-        this.montant = builder.montant;
-        this.type = Type.valueOf(builder.type);
-    }
+    // Enumération pour le type de transaction
+    public enum TypeTransaction { VENTE, ACHAT }
 
-    // Getters pour accéder aux propriétés
-    public String getId() {
-        return id;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public double getMontant() {
-        return montant;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id='" + id + '\'' +
-                ", date=" + date +
-                ", montant=" + montant +
-                ", type='" + type + '\'' +
-                '}';
-    }
-
-    // Classe interne Builder
+    // Builder Pattern
     public static class Builder {
         private String id;
-        private Date date;
+        private LocalDate date;
         private double montant;
-        private String type;
+        private TypeTransaction type;
 
-        public Builder setId(String id) {
+        public Builder id(String id) {
             this.id = id;
             return this;
         }
 
-        public Builder setDate(Date date) {
+        public Builder date(LocalDate date) {
             this.date = date;
             return this;
         }
 
-        public Builder setMontant(double montant) {
+        public Builder montant(double montant) {
             this.montant = montant;
             return this;
         }
 
-        public Builder setType(String type) {
-            if (!type.equals("Vente") && !type.equals("Achat")) {
-                throw new IllegalArgumentException("Le type doit être 'Vente' ou 'Achat'.");
-            }
+        public Builder type(TypeTransaction type) {
             this.type = type;
             return this;
         }
 
         public Transaction build() {
-            if (id == null || date == null || type == null) {
-                throw new IllegalStateException("Les champs id, date et type sont obligatoires.");
-            }
             return new Transaction(this);
         }
+    }
+
+    private Transaction(Builder builder) {
+        this.id = builder.id;
+        this.date = builder.date;
+        this.montant = builder.montant;
+        this.type = builder.type;
+    }
+
+    // Getters
+    public String getId() { return id; }
+    public LocalDate getDate() { return date; }
+    public double getMontant() { return montant; }
+    public TypeTransaction getType() { return type; }
+    public double setMontant(double montant){ return this.montant=montant; }
+
+    @Override
+    public String toString() {
+        return "Transaction{id='" + id + "', date=" + date + ", montant=" + montant + ", type=" + type + '}';
     }
 }

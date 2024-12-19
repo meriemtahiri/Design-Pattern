@@ -1,70 +1,54 @@
 package com.tahiri.CLASSES;
 
-import com.tahiri.INTERFACES.Observateur;
-import com.tahiri.INTERFACES.Sujet;
+import com.tahiri.INTERFACES.DefaultStrategy;
+import com.tahiri.INTERFACES.NotificationStrategy;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-public class Agent implements Sujet, Observateur {
+public class Agent {
     private String nom;
-    private List<Observateur> observateurs; // Liste des observateurs souscrits
-    private List<Transaction> transactions; // Liste des transactions de l'agent
+    private List<Transaction> transactions;
+    private List<Agent> observers;
+    private NotificationStrategy strategy;
 
     public Agent(String nom) {
         this.nom = nom;
-        this.observateurs = new ArrayList<>();
         this.transactions = new ArrayList<>();
+        this.observers = new ArrayList<>();
+        this.strategy = new DefaultStrategy();
     }
 
-    // Implémentation de Sujet
-    @Override
-    public void souscrire(Observateur observateur) {
-        observateurs.add(observateur);
-        System.out.println(nom + " a ajouté un nouvel observateur.");
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+        notifyObservers(transaction);
     }
 
-    @Override
-    public void seDesabonner(Observateur observateur) {
-        observateurs.remove(observateur);
-        System.out.println(nom + " a retiré un observateur.");
+    public void subscribe(Agent observer) { // observer va devenir un observateur chez cette agent
+        observers.add(observer);
     }
 
-    @Override
-    public void notifierObservateurs(String message) {
-        for (Observateur obs : observateurs) {
-            obs.notifier(message);
+    private void notifyObservers(Transaction transaction) { // notifier tous les observateurs de cet agent
+        Event event = new Event(this.nom, transaction);
+        for (Agent observer : observers) {
+            observer.update(event);
         }
     }
 
-    // Méthode supplémentaire pour notifier avec un événement
-    public void notifierObservateurs(EvenementNotification evenement) {
-        for (Observateur obs : observateurs) {
-            obs.notifier(evenement.toString());
-        }
+    public void update(Event event) {
+        strategy.processNotification(event);
     }
 
-    // Implémentation de Observateur
-    @Override
-    public void notifier(String message) {
-        System.out.println("Agent " + nom + " a reçu une notification : " + message);
+    public void setStrategy(NotificationStrategy strategy) {
+        this.strategy = strategy;
     }
 
-    // Ajout d'une transaction et notification
-    public void ajouterTransaction(Transaction transaction) {
-        transactions.add(transaction); // Ajouter la transaction
-        System.out.println(nom + " a ajouté une transaction : " + transaction);
-
-        // Créer un événement et notifier les observateurs
-        EvenementNotification evenement = new EvenementNotification(nom, transaction);
-        notifierObservateurs(evenement);
+    public Transaction getMaxTransaction() {
+        return transactions.stream()
+                .max(Comparator.comparingDouble(Transaction::getMontant))
+                .orElse(null);
     }
 
-    public String getNom() {
-        return nom;
-    }
-
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
+    public String getNom() { return nom; }
 }
